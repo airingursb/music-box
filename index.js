@@ -2,6 +2,7 @@ require("dotenv").config();
 const Octokit = require("@octokit/rest");
 const fetch = require("node-fetch");
 const eaw = require("eastasianwidth");
+const axios = require("axios");
 
 const {
   GIST_ID: gistId,
@@ -61,7 +62,7 @@ async function main() {
     lines.push(
       [
         name,
-        generateBarChart((plays * 100) / playsTotal, 17),
+        generateBarChart((plays * 100) / playsTotal, 13),
         `${plays}`.padStart(5),
         "plays",
       ].join(" ")
@@ -82,6 +83,14 @@ async function main() {
     });
   } catch (error) {
     console.error(`Unable to update gist\n${error}`);
+  }
+
+  try {
+    await axios.post(`https://maker.ifttt.com/trigger/receive_musicbox/json/with/key/${iftttKey}`, {
+      value1: lines.join("\n")
+    });
+  } catch (error) {
+    console.error(`Unable to send to IFTTT\n${error}`);
   }
 }
 
